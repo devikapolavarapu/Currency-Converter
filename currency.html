@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Exchange Converter</title>
+    <style>
+        /* Money-themed styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-blend-mode: overlay;
+        }
+        
+        .money-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 215, 0, 0.1);
+            z-index: -1;
+        }
+        
+        .converter-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            border: 2px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .converter-container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 100px;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="10" y="30" font-family="Arial" font-size="14" fill="%23d4af37">$ $ $</text><text x="30" y="60" font-family="Arial" font-size="14" fill="%23d4af37">€ € €</text><text x="10" y="90" font-family="Arial" font-size="14" fill="%23d4af37">£ £ £</text></svg>');
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, #d4af37, #f1c40f, #d4af37);
+            margin: 10px auto;
+        }
+        
+        .converter-box {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            transition: all 0.3s;
+            border-left: 3px solid #d4af37;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+        }
+        
+        .currency-selector {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .currency-flag {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #d4af37, #f1c40f);
+            border: none;
+            border-radius: 5px;
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #c9a227, #e6b800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        button::after {
+            content: "💵💶💷💴";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.1;
+            font-size: 20px;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            border-left: 4px solid #d4af37;
+            display: none;
+            position: relative;
+        }
+        
+        .result::before {
+            content: "💰";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+        }
+        
+        .currency-icons {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .currency-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 480px) {
+            .converter-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="money-overlay"></div>
+    <div class="converter-container">
+        <h1>Global Money Exchange</h1>
+        
+        <div class="currency-icons">
+            <div class="currency-icon">$</div>
+            <div class="currency-icon">€</div>
+            <div class="currency-icon">£</div>
+            <div class="currency-icon">¥</div>
+            <div class="currency-icon">₹</div>
+        </div>
+        
+        <div class="converter-box">
+            <div class="input-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" placeholder="Enter amount" min="0" step="0.01">
+            </div>
+            
+            <div class="input-group">
+                <label for="from">From Currency</label>
+                <select id="from">
+                    <option value="USD">🇺🇸 US Dollar (USD)</option>
+                    <option value="EUR">🇪🇺 Euro (EUR)</option>
+                    <option value="GBP">🇬🇧 British Pound (GBP)</option>
+                    <option value="JPY">🇯🇵 Japanese Yen (JPY)</option>
+                    <option value="CAD">🇨🇦 Canadian Dollar (CAD)</option>
+                    <option value="AUD">🇦🇺 Australian Dollar (AUD)</option>
+                    <option value="CNY">🇨🇳 Chinese Yuan (CNY)</option>
+                    <option value="INR">🇮🇳 Indian Rupee (INR)</option>
+                    <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                    <option value="BRL">🇧🇷 Brazilian Real (BRL)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="to">To Currency</label>
+                <select id="to">
+                    <option value="EUR">🇪🇺 Euro (EUR)</option>
+                    <option value="USD">🇺🇸 US Dollar (USD)</option>
+                    <option value="GBP">🇬🇧 British Pound (GBP)</option>
+                    <option value="JPY">🇯🇵 Japanese Yen (JPY)</option>
+                    <option value="CAD">🇨🇦 Canadian Dollar (CAD)</option>
+                    <option value="AUD">🇦🇺 Australian Dollar (AUD)</option>
+                    <option value="CNY">🇨🇳 Chinese Yuan (CNY)</option>
+                    <option value="INR">🇮🇳 Indian Rupee (INR)</option>
+                    <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                    <option value="BRL">🇧🇷 Brazilian Real (BRL)</option>
+                </select>
+            </div>
+            
+            <button id="convert">Convert Currency</button>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Exchange rates (example values - in a real app you'd fetch these from an API)
+        const exchangeRates = {
+            USD: 1.0,      // US Dollar
+            EUR: 0.93,     // Euro
+            GBP: 0.79,     // British Pound
+            JPY: 151.47,   // Japanese Yen
+            CAD: 1.37,     // Canadian Dollar
+            AUD: 1.52,     // Australian Dollar
+            CNY: 7.24,     // Chinese Yuan
+            INR: 83.31,    // Indian Rupee
+            CHF: 0.91,     // Swiss Franc
+            BRL: 5.06      // Brazilian Real
+        };
+
+        document.getElementById('convert').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const fromCurrency = document.getElementById('from').value;
+            const toCurrency = document.getElementById('to').value;
+            const resultElement = document.getElementById('result');
+            
+            if (isNaN(amount) || amount <= 0) {
+                resultElement.textContent = 'Please enter a valid positive amount';
+                resultElement.style.display = 'block';
+                resultElement.style.color = '#e74c3c';
+                return;
+            }
+            
+            // Convert to USD first, then to target currency
+            const amountInUSD = amount / exchangeRates[fromCurrency];
+            const convertedAmount = amountInUSD * exchangeRates[toCurrency];
+            
+            resultElement.innerHTML = `
+                ${amount.toFixed(2)} ${fromCurrency} = 
+                <strong>${convertedAmount.toFixed(2)} ${toCurrency}</strong>
+            `;
+            resultElement.style.display = 'block';
+            resultElement.style.color = '#2c3e50';
+        });
+
+        // Swap currencies if they're the same
+        document.getElementById('from').addEventListener('change', function() {
+            const toSelect = document.getElementById('to');
+            if (toSelect.value === this.value) {
+                // Find first different currency
+                for (let option of toSelect.options) {
+                    if (option.value !== this.value) {
+                        toSelect.value = option.value;
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
